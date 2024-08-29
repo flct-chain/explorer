@@ -1656,6 +1656,8 @@ type Eth1ERC20Indexed struct {
 	From         []byte               `protobuf:"bytes,5,opt,name=from,proto3" json:"from,omitempty"`
 	To           []byte               `protobuf:"bytes,6,opt,name=to,proto3" json:"to,omitempty"`
 	Value        []byte               `protobuf:"bytes,7,opt,name=value,proto3" json:"value,omitempty"`
+	TxFee        []byte               `protobuf:"bytes,8,opt,name=tx_fee,json=txFee,proto3" json:"tx_fee,omitempty"`
+	GasPrice     []byte               `protobuf:"bytes,9,opt,name=gas_price,json=gasPrice,proto3" json:"gas_price,omitempty"`
 }
 
 func (x *Eth1ERC20Indexed) Reset() {

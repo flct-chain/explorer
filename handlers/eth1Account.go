@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"eth2-exporter/db"
 	"eth2-exporter/eth1data"
@@ -10,7 +11,9 @@ import (
 	"eth2-exporter/utils"
 	"fmt"
 	"html/template"
+	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -488,6 +491,21 @@ func Eth1AddressErc20Transactions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Convert []byte to a string representing a decimal value
+func byteToDecimalString(b []byte) string {
+	if len(b) == 0 {
+		return "0"
+	}
+	bigInt := new(big.Int)
+	bigInt.SetBytes(b)
+	return bigInt.String()
+}
+
+// Convert uint64 to a decimal string
+func uint64ToDecimalString(value uint64) string {
+	return strconv.FormatUint(value, 10)
+}
+
 func Eth1AddressErc20TransactionsApi(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -506,6 +524,20 @@ func Eth1AddressErc20TransactionsApi(w http.ResponseWriter, r *http.Request) {
 	data, err := db.BigtableClient.GetAddressErc20TableDataApi(addressBytes, pageToken, queryToken)
 	if err != nil {
 		utils.LogError(err, "error getting eth1 ERC20 transactions table data", 0, errFields)
+	}
+	for _, i := range data.Data {
+		item := i.(*types.Erc20TransactionApiIndexed)
+		txHash, err := hex.DecodeString(strings.ReplaceAll(item.Hash, "0x", ""))
+		if err != nil {
+			logger.Warnf("error parsing tx hash")
+		}
+		txData, err := eth1data.GetEth1Transaction(common.BytesToHash(txHash), "ETH")
+		if err != nil {
+			continue
+		} else {
+			item.TxFee = byteToDecimalString(txData.Gas.TxFee)
+			item.GasPrice = uint64ToDecimalString(txData.Gas.Used)
+		}
 	}
 
 	err = json.NewEncoder(w).Encode(data)
