@@ -1274,6 +1274,7 @@ type Erc20TransactionApiIndexed struct {
 	TxFee              string               `protobuf:"bytes,12,opt,name=tx_fee,proto3" json:"tx_fee,omitempty"`
 	GasPrice           string               `protobuf:"bytes,12,opt,name=gas_price,proto3" json:"gas_price,omitempty"`
 	Symbol             string               `protobuf:"bytes,12,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Decimal            string               `protobuf:"bytes,12,opt,name=decimal,proto3" json:"decimal,omitempty"`
 	IsContractCreation bool                 `protobuf:"varint,10,opt,name=is_contract_creation,json=isContractCreation,proto3" json:"is_contract_creation,omitempty"`
 	// invokes_contract is unused, should mark reserved!
 	InvokesContract bool   `protobuf:"varint,11,opt,name=invokes_contract,json=invokesContract,proto3" json:"invokes_contract,omitempty"`

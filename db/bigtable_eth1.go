@@ -2414,6 +2414,16 @@ func (bigtable *Bigtable) GetAddressTransactions(address []byte, pageToken strin
 		token = skipBlockIfLastTxIndex(keys[len(keys)-1])
 	}
 
+	nextTransactions, nextLastKey, errs := bigtable.GetEth1TxsForAddressApi(token, DefaultInfScrollRows)
+
+	if len(nextLastKey) == 0 && errs == nil {
+		token = "end"
+	}
+
+	if nextTransactions == nil && errs == nil {
+		token = "end"
+	}
+
 	data := &types.TransactionDataApiResponse{
 		Data:        results,
 		PagingToken: token,
@@ -3251,6 +3261,7 @@ func (bigtable *Bigtable) GetAddressErc20TableDataApi(address []byte, pageToken 
 			To:          fmt.Sprintf("0x%x", transaction.To),
 			Value:       byteToDecimalString(transaction.Value),
 			Symbol:      tokens[string(transaction.TokenAddress)].Symbol,
+			Decimal:     byteToDecimalString(tokens[string(transaction.TokenAddress)].Decimals),
 		}
 
 		if queryToken != "" {
@@ -3262,6 +3273,16 @@ func (bigtable *Bigtable) GetAddressErc20TableDataApi(address []byte, pageToken 
 			// Append temp to results
 			results = append(results, temp)
 		}
+	}
+
+	nextTransactions, nextLastKey, errs := bigtable.GetEth1ERC20ForAddress(lastKey, DefaultInfScrollRows)
+
+	if nextTransactions == nil && errs == nil {
+		lastKey = "end"
+	}
+
+	if nextLastKey == "" && errs == nil {
+		lastKey = "end"
 	}
 
 	data := &types.Erc20TransactionDataApiResponse{
